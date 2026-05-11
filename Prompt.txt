@@ -1,0 +1,2 @@
+1. give me step by step instructions to learn docker by implementing everything.
+order the instructions in a way that at the end of the instuctions 2 or more application is built and they are completely up and running in 2 or more docker containers and cpable of making inter and intra container communication and also able to work on same network and also able to read files / communicate with apps from the host
