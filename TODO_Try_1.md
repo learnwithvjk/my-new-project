@@ -611,16 +611,15 @@ CMD ["python", "app.py"]
 ### 5. Build the second repo image
 
 ```bash
-cd ~/notify_worker
-docker build -t learn_docker/notify_worker:1.0 .
+docker build -t learn_docker/notify_worker:1.0 ./notify_worker
 ```
 
 
 ### 6. Prepare shared host files
 
 ```bash
-mkdir -p ~/notify_worker/shared
-echo "Message coming from host into second repo" > ~/notify_worker/shared/instructions.txt
+mkdir -p ./notify_worker/shared
+echo "Message coming from host into second repo" > ./notify_worker/shared/instructions.txt
 ```
 
 
@@ -634,7 +633,7 @@ docker run --rm -d \
   --network appnet \
   -p 8090:8090 \
   -e API_URL=http://api:5012 \
-  -v ~/notify_worker/shared:/shared \
+  -v ./notify_worker/shared:/shared \
   learn_docker/notify_worker:1.0
 ```
 
@@ -644,7 +643,7 @@ docker run --rm -d \
 ```bash
 curl -s http://localhost:8090/health
 curl -s http://localhost:8090/sync
-cat ~/notify_worker/shared/worker-output.log
+cat ./notify_worker/shared/worker-output.log
 ```
 
 ✅ You now have a **second repo/project** with its own image and container, talking to the first repo’s `api`, reading from host files, and writing back to the host.
@@ -872,7 +871,7 @@ exit
 Update files on the host:
 
 ```bash
-echo "updated by host for worker repo" > ~/notify_worker/shared/instructions.txt
+echo "updated by host for worker repo" > ./notify_worker/shared/instructions.txt
 echo "updated by host for ops repo" > ~/ops_console/shared/notes.txt
 ```
 
@@ -889,7 +888,7 @@ curl -s http://localhost:8070/status
 Check the file written by the second repo:
 
 ```bash
-cat ~/notify_worker/shared/worker-output.log
+cat ./notify_worker/shared/worker-output.log
 ```
 
 
@@ -955,7 +954,7 @@ services:
 ```
 
 
-### 3. Create `docker-compose.yml` in `~/notify_worker`
+### 3. Create `docker-compose.yml` in `./notify_worker`
 
 ```yaml
 version: "3.9"
@@ -1016,7 +1015,7 @@ docker compose up --build -d
 Second repo:
 
 ```bash
-cd ~/notify_worker
+cd ./notify_worker
 docker compose up --build -d
 ```
 
@@ -1057,8 +1056,8 @@ It extends the same verification mindset already present in the existing todo, b
 - ✅ Repo 3 (`ops_console`) is built and reachable from the host on port `8070`.
 - ✅ Repo 2 can call Repo 1’s `api` using `http://api:5012`.
 - ✅ Repo 3 can call both Repo 1 and Repo 2 using container DNS names.
-- ✅ Repo 2 reads host file input from `~/notify_worker/shared/instructions.txt`.
-- ✅ Repo 2 writes host file output to `~/notify_worker/shared/worker-output.log`.
+- ✅ Repo 2 reads host file input from `./notify_worker/shared/instructions.txt`.
+- ✅ Repo 2 writes host file output to `./notify_worker/shared/worker-output.log`.
 - ✅ Repo 3 reads host file input from `~/ops_console/shared/notes.txt`.
 - ✅ All containers are attached to the same Docker network.
 - ✅ The setup works both with `docker run` and with separate Compose files.
