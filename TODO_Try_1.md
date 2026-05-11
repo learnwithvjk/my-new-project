@@ -384,7 +384,6 @@ Compose is the clean “implement everything” tool: it declares networks, volu
 
 1. In `./`, create `docker-compose.yml`:
    ```yaml
-   version: "3.9"
    services:
      db:
        image: postgres:16
@@ -441,6 +440,17 @@ Compose is the clean “implement everything” tool: it declares networks, volu
    volumes:
      pgdata:
    ```
+2. Update Dockerfile in api:
+    ```
+    FROM python:3.12-slim
+    WORKDIR /app
+    RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+    COPY requirements.txt .
+    RUN pip install --no-cache-dir -r requirements.txt
+    COPY app.py .
+    EXPOSE 5012
+    CMD ["python", "app.py"]
+    ```
 2. Launch the whole stack:
    ```bash
    docker compose up --build -d

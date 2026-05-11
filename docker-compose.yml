@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:16
+    container_name: db
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: app
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks: [ appnet ]
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U app -d app" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: ./apps/api
+    container_name: api
+    environment:
+      DATABASE_URL: postgresql://app:app@db:5432/app
+    volumes:
+      - ./shared:/data:ro # host ↔ container files
+      - ./shared/logs:/logs # optional logs to host
+    ports:
+      - "5012:5012" # host ↔ container access
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [ appnet ]
+    healthcheck:
+      test: [ "CMD", "curl", "-fsS", "http://localhost:5012/health" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  web:
+    build: ./apps/web
+    container_name: web
+    environment:
+      API_URL: http://api:5012
+    ports:
+      - "8080:8080" # host ↔ container access
+    depends_on:
+      api:
+        condition: service_healthy
+    networks: [ appnet ]
+
+networks:
+  appnet:
+    driver: bridge
+
+volumes:
+  pgdata:
